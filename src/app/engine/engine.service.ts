@@ -1,94 +1,195 @@
-import * as THREE from 'three';
-import {ElementRef, Injectable, NgZone, OnDestroy} from '@angular/core';
+import * as THREE from 'three'
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
-@Injectable({providedIn: 'root'})
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer.js"
+
+@Injectable({ providedIn: 'root' })
 export class EngineService implements OnDestroy {
-  private canvas: HTMLCanvasElement;
-  private renderer: THREE.WebGLRenderer;
-  private camera: THREE.PerspectiveCamera;
-  private scene: THREE.Scene;
-  private light: THREE.AmbientLight;
+  #canvas: HTMLCanvasElement
+  #renderer: THREE.WebGLRenderer
+  #camera: THREE.PerspectiveCamera
+  #scene: THREE.Scene
+  #light: THREE.AmbientLight
 
-  private cube: THREE.Mesh;
+  #controls: OrbitControls
+  #manager: THREE.LoadingManager
 
-  private frameId: number = null;
+  #cube: THREE.Mesh
+  #duck: THREE.Object3D
+  #frameId: number = null
 
   public constructor(private ngZone: NgZone) {
   }
 
   public ngOnDestroy(): void {
-    if (this.frameId != null) {
-      cancelAnimationFrame(this.frameId);
+    if (this.#frameId != null) {
+      cancelAnimationFrame(this.#frameId)
     }
   }
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     // The first step is to get the reference of the canvas element from our HTML document
-    this.canvas = canvas.nativeElement;
+    this.#canvas = canvas.nativeElement
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
+    this.#renderer = new THREE.WebGLRenderer({
+      canvas: this.#canvas,
       alpha: true,    // transparent background
       antialias: true // smooth edges
-    });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    })
+    this.#renderer.setSize(window.innerWidth, window.innerHeight)
 
     // create the scene
-    this.scene = new THREE.Scene();
+    this.#scene = new THREE.Scene()
 
-    this.camera = new THREE.PerspectiveCamera(
-      75, window.innerWidth / window.innerHeight, 0.1, 1000
-    );
-    this.camera.position.z = 5;
-    this.scene.add(this.camera);
+    // setup camera
+    this.#setCamera()
 
     // soft white light
-    this.light = new THREE.AmbientLight(0x404040);
-    this.light.position.z = 10;
-    this.scene.add(this.light);
+    this.#setLights()
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    this.cube = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cube);
+    this.#scene.background = new THREE.Color(0x323232)
+    // this.#scene.fog = new THREE.Fog(this.#scene.background, 1, 10)
+    // this.#addSimpleGeometry()
+    this.#loadSampleModel()
+    this.#setupControls()
+    this.animate()
+  }
+
+  #setCamera = () => {
+    this.#camera = new THREE.PerspectiveCamera(
+      75, window.innerWidth / window.innerHeight, 0.1, 1000
+    )
+    this.#camera.position.z = 5
+    this.#camera.lookAt(this.#scene.position)
+    this.#scene.add(this.#camera)
+  }
+
+  #setHelpers = () => {
+    const axis = new THREE.AxesHelper(10)
+    this.#scene.add(axis)
+
+    // size : number, divisions : Number, colorCenterLine : Color, colorGrid : Color
+    const gridHelper = new THREE.GridHelper(10, 10)
+    this.#scene.add(gridHelper)
+
+    const camerahelper = new THREE.CameraHelper(this.#camera)
+    this.#scene.add(camerahelper)
+
+    const box = new THREE.BoxHelper(this.#duck, 0xffff00)
+    this.#scene.add(box)
 
   }
 
-  public animate(): void {
+  #setLights = () => {
+
+    // const spotLight = new THREE.SpotLight(0xffffff)
+    // spotLight.position.set(5, 0, 0)
+    // this.#scene.add(spotLight)
+
+    // const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+    // this.#scene.add(spotLightHelper)
+
+    // soft  natural light
+    // const ambient = new THREE.AmbientLight(0xffeedd, 0.5)
+    // this.#scene.add(ambient)
+
+    // const directional = new THREE.DirectionalLight(0xffeedd, 1)
+    // directional.position.y = 5
+
+    // const helper = new THREE.DirectionalLightHelper(directional, 5, 0xff6666)
+    // this.#scene.add(helper)
+
+    // this.#scene.add(directional)
+
+    const hemisphereLight = new THREE.HemisphereLight(0x404040, 0xFFFFFF, 1)
+    hemisphereLight.position.y =10
+
+    const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5)
+    this.#scene.add(hemisphereLightHelper)
+    this.#scene.add(hemisphereLight)
+  }
+
+  #loadSampleModel = () => {
+    // load terrain models
+    this.#manager = new THREE.LoadingManager()
+    const loader = new GLTFLoader(this.#manager).setPath('../assets/')
+    loader.load('duck.glb', (gltf) => {
+      this.#duck = gltf.scene
+      this.#addSpriteLable()
+      this.#scene.add(this.#duck)
+      this.#setHelpers()
+    })
+    this.#manager.onLoad = () => {
+      console.log('model loaded ...')
+    }
+  }
+
+  #setupControls = () => {
+    // set controls
+    this.#controls = new OrbitControls(this.#camera, this.#renderer.domElement)
+    this.#controls.addEventListener('change', e => {
+      // console.log(this.#controls.target)
+    });
+  }
+
+  #addSpriteLable = () => {
+    const map = new THREE.TextureLoader().load('../assets/lable.png')
+    const material = new THREE.SpriteMaterial({ map: map })
+
+    const sprite = new THREE.Sprite(material)
+    sprite.position.set(0, 2, 0)
+    sprite.scale.set(1, 1, 1)
+    this.#duck.add(sprite)
+  }
+
+  #addSimpleGeometry = () => {
+    const geometry = new THREE.BoxGeometry(1, 1, 1)
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    this.#cube = new THREE.Mesh(geometry, material)
+    this.#scene.add(this.#cube)
+  }
+
+  private animate(): void {
     // We have to run this outside angular zones,
     // because it could trigger heavy changeDetection cycles.
-    this.ngZone.runOutsideAngular(() => {
+    this.ngZone.runOutsideAngular(_ => {
       if (document.readyState !== 'loading') {
-        this.render();
+        this.render()
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
-        });
+        window.addEventListener('DOMContentLoaded', _ => {
+          this.render()
+        })
       }
 
-      window.addEventListener('resize', () => {
-        this.resize();
-      });
-    });
+      window.addEventListener('resize', _ => {
+        this.resize()
+      })
+    })
   }
 
   public render(): void {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
+    this.#frameId = requestAnimationFrame(_ => {
+      this.render()
+    })
 
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
-    this.renderer.render(this.scene, this.camera);
+    // this.#cube.rotation.x += 0.01
+    // this.#cube.rotation.y += 0.01
+    // this.#duck.rotation.y +=0.01
+    this.#renderer.render(this.#scene, this.#camera)
   }
 
   public resize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = window.innerWidth
+    const height = window.innerHeight
 
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.#camera.aspect = width / height
+    this.#camera.updateProjectionMatrix()
 
-    this.renderer.setSize(width, height);
+    this.#renderer.setSize(width, height)
   }
 }
