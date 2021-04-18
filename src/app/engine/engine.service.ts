@@ -22,6 +22,7 @@ export class EngineService implements OnDestroy {
 
   #cube: THREE.Mesh
   #duck: THREE.Object3D
+  #anotherDuck: THREE.Object3D
   #frameId: number = null
 
   public constructor(private ngZone: NgZone) {
@@ -173,6 +174,7 @@ export class EngineService implements OnDestroy {
     const loader = new GLTFLoader(this.#manager).setPath('../assets/')
     loader.load('duck.glb', (gltf) => {
       this.#duck = gltf.scene
+      this.#cloneThisModel (this.#duck)
       this.#addSpriteLable()
       this.#addCanvasLable()
       this.#addCSSLables()
@@ -182,6 +184,12 @@ export class EngineService implements OnDestroy {
     this.#manager.onLoad = () => {
       console.log('model loaded ...')
     }
+  }
+
+  #cloneThisModel = model => {
+    this.#anotherDuck = model.clone()
+    this.#anotherDuck.position.set(-5, 0 , -5)
+    this.#scene.add(this.#anotherDuck)
   }
 
   #setupControls = () => {
