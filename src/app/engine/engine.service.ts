@@ -81,7 +81,7 @@ export class EngineService implements OnDestroy {
   #addCSSLables = () => {
 
     const div = document.createElement('div')
-    div.className = 'lable'
+    div.className = 'label'
     // div.textContent = '<img href="https://www.picsum.photo/100>" CSS Lable' 
     div.innerHTML = '<img src="../assets/lable.png"> CSS Lable'
 
