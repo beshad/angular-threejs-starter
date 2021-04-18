@@ -3,7 +3,13 @@ import {EngineService} from './engine.service';
 
 @Component({
   selector: 'app-engine',
-  templateUrl: './engine.component.html'
+  templateUrl: './engine.component.html',
+  styles: [`
+  button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }`]
 })
 export class EngineComponent implements OnInit {
 
@@ -15,6 +21,10 @@ export class EngineComponent implements OnInit {
 
   public ngOnInit(): void {
     this.engServ.createScene(this.rendererCanvas)
+  }
+
+  public tween = () => {
+    this.engServ.tween()
   }
 
 }

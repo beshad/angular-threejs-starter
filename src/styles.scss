@@ -7,8 +7,9 @@
   background: rgb(245, 199, 14);
   border-radius: 5px;
   padding: 5px 10px;
-  position: relative;
-  top: 10px;
+  position: absolute;
+  top:0; 
+  left:0;
   img {
     display: inline-block;
     vertical-align: middle;

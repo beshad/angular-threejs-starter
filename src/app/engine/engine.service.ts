@@ -3,10 +3,13 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
+import * as TWEEN from "@tweenjs/tween.js"
+
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js"
+import { Vector3 } from 'three'
 
 @Injectable({ providedIn: 'root' })
 export class EngineService implements OnDestroy {
@@ -44,10 +47,10 @@ export class EngineService implements OnDestroy {
       antialias: true // smooth edges
     })
     this.#renderer.setSize(window.innerWidth, window.innerHeight)
-    
+
     this.#labelRenderer = new CSS2DRenderer()
     this.#labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild( this.#labelRenderer.domElement )
+    document.body.appendChild(this.#labelRenderer.domElement)
     // create the scene
     this.#scene = new THREE.Scene()
 
@@ -80,10 +83,10 @@ export class EngineService implements OnDestroy {
     const div = document.createElement('div')
     div.className = 'lable'
     // div.textContent = '<img href="https://www.picsum.photo/100>" CSS Lable' 
-    div.innerHTML =  '<img src="../assets/lable.png"> CSS Lable'
+    div.innerHTML = '<img src="../assets/lable.png"> CSS Lable'
 
     const lable = new CSS2DObject(div)
-    lable.position.set(0, 2,0)
+    lable.position.set(0, 2, 0)
     this.#anotherDuck.add(lable)
   }
 
@@ -174,7 +177,7 @@ export class EngineService implements OnDestroy {
     const loader = new GLTFLoader(this.#manager).setPath('../assets/')
     loader.load('duck.glb', (gltf) => {
       this.#duck = gltf.scene
-      this.#cloneThisModel (this.#duck)
+      this.#cloneThisModel(this.#duck)
       this.#addSpriteLable()
       this.#addCanvasLable()
       this.#addCSSLables()
@@ -188,7 +191,7 @@ export class EngineService implements OnDestroy {
 
   #cloneThisModel = model => {
     this.#anotherDuck = model.clone()
-    this.#anotherDuck.position.set(-5, 0 , -5)
+    this.#anotherDuck.position.set(-5, 0, -5)
     this.#scene.add(this.#anotherDuck)
   }
 
@@ -238,6 +241,7 @@ export class EngineService implements OnDestroy {
   public render(): void {
     this.#frameId = requestAnimationFrame(_ => {
       this.render()
+      TWEEN.update()
     })
 
     // this.#cube.rotation.x += 0.01
@@ -255,5 +259,47 @@ export class EngineService implements OnDestroy {
     this.#camera.updateProjectionMatrix()
 
     this.#renderer.setSize(width, height)
+  }
+
+  tween = () => {
+
+    TWEEN.removeAll()
+
+    // this.#controls.target.x = 5
+    // this.#camera.position.x = 5
+    // this.#controls.target.set(5, 0, 0)
+    // this.#camera.position.set(5,3,10)
+
+    new TWEEN.Tween(this.#camera.position)
+      .to({
+        x: 5,
+        y: 3,
+        z: 10
+      }, 1000)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onStart(_ => {
+        new TWEEN.Tween(this.#controls.target)
+          .to({
+            x: 5,
+            y: 0,
+            z: 0
+          }, 1000)
+          .easing(TWEEN.Easing.Quadratic.InOut)
+          .start()
+
+        this.#controls.enabled = false
+      })
+      .onUpdate(_ => {
+        this.#controls.update()
+        this.#camera.updateProjectionMatrix()
+        this.#camera.updateMatrix()
+      })
+      .onComplete(_ => {
+        this.#controls.update()
+        this.#controls.enabled = true
+
+      })
+      .start()
+
   }
 }
