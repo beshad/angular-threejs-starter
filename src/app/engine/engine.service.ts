@@ -12,6 +12,7 @@ import {
 export class EngineService implements OnDestroy {
   #canvas: HTMLCanvasElement
   #renderer: THREE.WebGLRenderer
+  #labelRenderer: CSS2DRenderer
   #camera: THREE.PerspectiveCamera
   #scene: THREE.Scene
   #light: THREE.AmbientLight
@@ -42,7 +43,10 @@ export class EngineService implements OnDestroy {
       antialias: true // smooth edges
     })
     this.#renderer.setSize(window.innerWidth, window.innerHeight)
-
+    
+    this.#labelRenderer = new CSS2DRenderer()
+    this.#labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild( this.#labelRenderer.domElement )
     // create the scene
     this.#scene = new THREE.Scene()
 
@@ -68,6 +72,18 @@ export class EngineService implements OnDestroy {
     this.#camera.position.y = 3
     this.#camera.lookAt(this.#scene.position)
     this.#scene.add(this.#camera)
+  }
+
+  #addCSSLables = () => {
+
+    const div = document.createElement('div')
+    div.className = 'lable'
+    // div.textContent = '<img href="https://www.picsum.photo/100>" CSS Lable' 
+    div.innerHTML =  '<img src="../assets/lable.png"> CSS Lable'
+
+    const lable = new CSS2DObject(div)
+    lable.position.set(0, 4,0)
+    this.#duck.add(lable)
   }
 
   #setHelpers = () => {
@@ -159,6 +175,7 @@ export class EngineService implements OnDestroy {
       this.#duck = gltf.scene
       this.#addSpriteLable()
       this.#addCanvasLable()
+      this.#addCSSLables()
       this.#scene.add(this.#duck)
       this.#setHelpers()
     })
@@ -219,6 +236,7 @@ export class EngineService implements OnDestroy {
     // this.#cube.rotation.y += 0.01
     // this.#duck.rotation.y +=0.01
     this.#renderer.render(this.#scene, this.#camera)
+    this.#labelRenderer.render(this.#scene, this.#camera)
   }
 
   public resize(): void {

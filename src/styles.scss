@@ -1,0 +1,17 @@
+* {
+  margin: 0;
+}
+.lable {
+  color: tomato;
+  font-family: sans-serif;
+  background: rgb(245, 199, 14);
+  border-radius: 5px;
+  padding: 5px 10px;
+  position: absolute;
+  top: 10px;
+  img {
+    display: inline-block;
+    vertical-align: middle;
+    width: 50px
+  }
+}

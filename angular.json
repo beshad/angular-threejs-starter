@@ -28,7 +28,7 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "src/styles/main.scss"
+              "src/styles.scss"
             ],
             "scripts": [],
             "stylePreprocessorOptions": {
@@ -94,7 +94,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "styles": [
-              "src/styles/main.scss"
+              "src/styles.scss"
             ],
             "assets": [
               "src/assets",
