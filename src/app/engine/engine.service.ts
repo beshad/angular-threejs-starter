@@ -83,8 +83,8 @@ export class EngineService implements OnDestroy {
     div.innerHTML =  '<img src="../assets/lable.png"> CSS Lable'
 
     const lable = new CSS2DObject(div)
-    lable.position.set(0, 4,0)
-    this.#duck.add(lable)
+    lable.position.set(0, 2,0)
+    this.#anotherDuck.add(lable)
   }
 
   #setHelpers = () => {
