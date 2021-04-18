@@ -64,7 +64,8 @@ export class EngineService implements OnDestroy {
     this.#camera = new THREE.PerspectiveCamera(
       75, window.innerWidth / window.innerHeight, 0.1, 1000
     )
-    this.#camera.position.z = 5
+    this.#camera.position.z = 10
+    this.#camera.position.y = 3
     this.#camera.lookAt(this.#scene.position)
     this.#scene.add(this.#camera)
   }
@@ -94,24 +95,60 @@ export class EngineService implements OnDestroy {
     // const spotLightHelper = new THREE.SpotLightHelper(spotLight)
     // this.#scene.add(spotLightHelper)
 
-    // soft  natural light
-    // const ambient = new THREE.AmbientLight(0xffeedd, 0.5)
-    // this.#scene.add(ambient)
+    const ambient = new THREE.AmbientLight(0xffeedd, 0.5)
+    this.#scene.add(ambient)
 
-    // const directional = new THREE.DirectionalLight(0xffeedd, 1)
-    // directional.position.y = 5
+    const directional = new THREE.DirectionalLight(0xffeedd, 1)
+    directional.position.y = 5
 
-    // const helper = new THREE.DirectionalLightHelper(directional, 5, 0xff6666)
-    // this.#scene.add(helper)
+    const helper = new THREE.DirectionalLightHelper(directional, 3, 0xff6666)
+    this.#scene.add(helper)
 
-    // this.#scene.add(directional)
+    this.#scene.add(directional)
 
-    const hemisphereLight = new THREE.HemisphereLight(0x404040, 0xFFFFFF, 1)
-    hemisphereLight.position.y =10
+    // const hemisphereLight = new THREE.HemisphereLight(0x404040, 0xFFFFFF, 1)
+    // hemisphereLight.position.y =10
 
-    const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5)
-    this.#scene.add(hemisphereLightHelper)
-    this.#scene.add(hemisphereLight)
+    // const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5)
+    // this.#scene.add(hemisphereLightHelper)
+    // this.#scene.add(hemisphereLight)
+  }
+
+  #addCanvasLable = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 400
+    canvas.height = 200
+    canvas.style.cssText = `
+       border:3px solid #fff
+    `
+    const context = canvas.getContext('2d')
+    context.fillStyle = '#fff';
+    context.textAlign = 'center'
+    context.font = '46px Arial'
+    context.fillText("hello world!", 275, 110)
+
+    const image = new Image()
+    image.src = '../assets/lable.png'
+    image.onload = _ => {
+      console.log(image.height)
+      context.drawImage(image, 0, 55, 170, 85)
+      const map = new THREE.Texture(canvas)
+      map.needsUpdate = true
+
+      const marker = new THREE.SpriteMaterial({
+        map: map,
+        transparent: false,
+        sizeAttenuation: true,
+        color: 0xff6666
+      })
+
+      var sprite = new THREE.Sprite(marker)
+      sprite.scale.set(1, 0.5, 1)
+      sprite.position.set(0, 2, 0)
+
+      this.#duck.add(sprite)
+    }
+
   }
 
   #loadSampleModel = () => {
@@ -121,6 +158,7 @@ export class EngineService implements OnDestroy {
     loader.load('duck.glb', (gltf) => {
       this.#duck = gltf.scene
       this.#addSpriteLable()
+      this.#addCanvasLable()
       this.#scene.add(this.#duck)
       this.#setHelpers()
     })
@@ -142,7 +180,7 @@ export class EngineService implements OnDestroy {
     const material = new THREE.SpriteMaterial({ map: map })
 
     const sprite = new THREE.Sprite(material)
-    sprite.position.set(0, 2, 0)
+    sprite.position.set(0, 3, 0)
     sprite.scale.set(1, 1, 1)
     this.#duck.add(sprite)
   }
