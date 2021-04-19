@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
 import * as TWEEN from "@tweenjs/tween.js"
-import {  TweenLite, TweenMax } from 'gsap'
+import { TweenLite, TweenMax } from 'gsap'
 
 import {
   CSS2DRenderer,
@@ -22,6 +22,8 @@ export class EngineService implements OnDestroy {
   #light: THREE.AmbientLight
   #clock = new THREE.Clock()
 
+  #raycaster = new THREE.Raycaster()
+  #mouse = new THREE.Vector2()
 
   #controls: OrbitControls
   #manager: THREE.LoadingManager
@@ -40,10 +42,33 @@ export class EngineService implements OnDestroy {
     }
   }
 
+  #onDuckClicked = event => {
+
+    this.#mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+    this.#mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+    this.#raycaster.setFromCamera(this.#mouse, this.#camera)
+
+    // const mesh = <THREE.Mesh>this.#scene.getObjectByName('LOD3spShape')
+    const intersects = this.#raycaster.intersectObjects(
+      this.#anotherDuck.children,
+      true
+    )
+    if (intersects.length > 0) {
+      const color = new THREE.Color('#ff00ff')
+      const mesh = <THREE.Mesh>intersects[0].object
+      TweenLite.to((<any>mesh).material.color, 1, {
+        r: color.r,
+        g: color.g,
+        b: color.b,
+      });
+    }
+
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     // The first step is to get the reference of the canvas element from our HTML document
     this.#canvas = canvas.nativeElement
-
+    this.#canvas.addEventListener("click", this.#onDuckClicked)
     this.#renderer = new THREE.WebGLRenderer({
       canvas: this.#canvas,
       alpha: true,    // transparent background
@@ -317,15 +342,4 @@ export class EngineService implements OnDestroy {
 
   }
 
-  toggleTexture = () => {
-    const color = new THREE.Color('#ff00ff')
-    const mesh = <THREE.Mesh>this.#scene.getObjectByName('LOD3spShape')
-    TweenLite.to(<THREE.Material>mesh.material.color, 1, {
-      r: color.r,
-      g: color.g,
-      b: color.b,
-    });
-
-    // (this.#scene.getObjectByName('LOD3spShape') as THREE.Mesh).material = new THREE.MeshStandardMaterial({ color: 'tomato' })
-  }
 }
