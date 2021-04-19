@@ -1,4 +1,8 @@
-<button #btn (click)="tween()">tween soemthing</button>
+<div class="btns">
+  <button #btn (click)="tween()">tween something</button>
+  <button (click)="texture()">toggle some texture</button>
+</div>
+
 <div class="engine-wrapper">
   <canvas #rendererCanvas id="renderCanvas"></canvas>
 </div>

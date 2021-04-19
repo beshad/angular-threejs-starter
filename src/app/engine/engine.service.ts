@@ -19,6 +19,8 @@ export class EngineService implements OnDestroy {
   #camera: THREE.PerspectiveCamera
   #scene: THREE.Scene
   #light: THREE.AmbientLight
+  #clock = new THREE.Clock()
+
 
   #controls: OrbitControls
   #manager: THREE.LoadingManager
@@ -175,8 +177,16 @@ export class EngineService implements OnDestroy {
     // load terrain models
     this.#manager = new THREE.LoadingManager()
     const loader = new GLTFLoader(this.#manager).setPath('../assets/')
-    loader.load('duck.glb', (gltf) => {
-      this.#duck = gltf.scene
+    loader.load('duck.glb', glb => {
+      glb.scene.traverse(child => {
+        if ((<THREE.Mesh>child).isMesh) {
+          let model = <THREE.Mesh>child
+          model.receiveShadow = true
+          model.castShadow = true
+          this.#duck = glb.scene
+        }
+      })
+
       this.#cloneThisModel(this.#duck)
       this.#addSpriteLable()
       this.#addCanvasLable()
@@ -241,6 +251,8 @@ export class EngineService implements OnDestroy {
   public render(): void {
     this.#frameId = requestAnimationFrame(_ => {
       this.render()
+      let delta = this.#clock.getDelta()
+      // console.log(delta)
       TWEEN.update()
     })
 
@@ -301,5 +313,10 @@ export class EngineService implements OnDestroy {
       })
       .start()
 
+  }
+
+  toggleTexture = () => {
+  
+    (this.#scene.getObjectByName('LOD3spShape') as THREE.Mesh).material = new THREE.MeshStandardMaterial({ color: 'tomato' })
   }
 }

@@ -5,7 +5,7 @@ import {EngineService} from './engine.service';
   selector: 'app-engine',
   templateUrl: './engine.component.html',
   styles: [`
-  button {
+  .btns {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -25,6 +25,10 @@ export class EngineComponent implements OnInit {
 
   public tween = () => {
     this.engServ.tween()
+  }
+
+  public texture = () => {
+    this.engServ.toggleTexture()
   }
 
 }
