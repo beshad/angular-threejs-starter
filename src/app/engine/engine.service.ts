@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
 import * as TWEEN from "@tweenjs/tween.js"
+import {  TweenLite, TweenMax } from 'gsap'
 
 import {
   CSS2DRenderer,
@@ -218,7 +219,8 @@ export class EngineService implements OnDestroy {
     const material = new THREE.SpriteMaterial({ map: map })
 
     const sprite = new THREE.Sprite(material)
-    sprite.position.set(0, 3, 0)
+    TweenLite.to(sprite.position, 1, { y: 3 })
+    // sprite.position.set(0, 3, 0)
     sprite.scale.set(1, 1, 1)
     this.#duck.add(sprite)
   }
@@ -316,7 +318,14 @@ export class EngineService implements OnDestroy {
   }
 
   toggleTexture = () => {
-  
-    (this.#scene.getObjectByName('LOD3spShape') as THREE.Mesh).material = new THREE.MeshStandardMaterial({ color: 'tomato' })
+    const color = new THREE.Color('#ff00ff')
+    const mesh = <THREE.Mesh>this.#scene.getObjectByName('LOD3spShape')
+    TweenLite.to(<THREE.Material>mesh.material.color, 1, {
+      r: color.r,
+      g: color.g,
+      b: color.b,
+    });
+
+    // (this.#scene.getObjectByName('LOD3spShape') as THREE.Mesh).material = new THREE.MeshStandardMaterial({ color: 'tomato' })
   }
 }
