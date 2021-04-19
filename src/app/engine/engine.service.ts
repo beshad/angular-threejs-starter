@@ -4,13 +4,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
 import * as TWEEN from "@tweenjs/tween.js"
-import { TweenLite, TweenMax } from 'gsap'
+import { TweenLite } from 'gsap'
 
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js"
-import { Vector3 } from 'three'
+
 
 @Injectable({ providedIn: 'root' })
 export class EngineService implements OnDestroy {
@@ -43,7 +43,6 @@ export class EngineService implements OnDestroy {
   }
 
   #onDuckClicked = event => {
-
     this.#mouse.x = (event.clientX / window.innerWidth) * 2 - 1
     this.#mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
     this.#raycaster.setFromCamera(this.#mouse, this.#camera)
@@ -341,5 +340,9 @@ export class EngineService implements OnDestroy {
       .start()
 
   }
+
+
+
+  
 
 }
