@@ -73,12 +73,13 @@ export class EngineService implements OnDestroy {
     const sprite1 = new THREE.Sprite(new THREE.SpriteMaterial({ color: '#69f' }));
     sprite1.position.set(5, 0, 5);
     sprite1.scale.set(1, 2, 1);
+    sprite1.userData = { name: 'sprite 1' }
     this.#group.add(sprite1);
 
     const sprite2 = new THREE.Sprite(new THREE.SpriteMaterial({ color: '#69f', sizeAttenuation: false }));
     sprite2.position.set(-5, 0, 3);
-    sprite2.center.set(0.5, 0);
     sprite2.scale.set(.1, .5, .1);
+    sprite2.userData = { name: 'sprite 2' }
     this.#group.add(sprite2)
 
     this.#scene.add(this.#group)
@@ -88,8 +89,10 @@ export class EngineService implements OnDestroy {
 
     if (this.selectedObject) {
       this.selectedObject.material.color.set('#69f');
+      this.selectedObject.traverse(object => {
+        this.selectedObject.remove(object)
+      })
       this.selectedObject = null;
-
     }
     const pointer = new THREE.Vector2()
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -104,8 +107,12 @@ export class EngineService implements OnDestroy {
       })[0]
 
       if (res && res.object) {
-
         this.selectedObject = res.object;
+        const div = document.createElement('div')
+        div.className = 'label'
+        div.innerHTML = res.object.userData.name
+        const label = new CSS2DObject(div)
+        this.selectedObject.add(label)
         this.selectedObject.material.color.set('#f00');
 
       }
