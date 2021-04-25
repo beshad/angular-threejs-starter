@@ -22,6 +22,10 @@ export class EngineService implements OnDestroy {
   #light: THREE.AmbientLight
   #clock = new THREE.Clock()
 
+  selectedObject
+
+  #group = new THREE.Group()
+
   #raycaster = new THREE.Raycaster()
   #mouse = new THREE.Vector2()
 
@@ -64,10 +68,56 @@ export class EngineService implements OnDestroy {
 
   }
 
+  #addMouseOverSprites = () => {
+
+    const sprite1 = new THREE.Sprite(new THREE.SpriteMaterial({ color: '#69f' }));
+    sprite1.position.set(5, 0, 5);
+    sprite1.scale.set(1, 2, 1);
+    this.#group.add(sprite1);
+
+    const sprite2 = new THREE.Sprite(new THREE.SpriteMaterial({ color: '#69f', sizeAttenuation: false }));
+    sprite2.position.set(-5, 0, 3);
+    sprite2.center.set(0.5, 0);
+    sprite2.scale.set(.1, .5, .1);
+    this.#group.add(sprite2)
+
+    this.#scene.add(this.#group)
+  }
+
+  #onPointerMove = event => {
+
+    if (this.selectedObject) {
+      this.selectedObject.material.color.set('#69f');
+      this.selectedObject = null;
+
+    }
+    const pointer = new THREE.Vector2()
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+    this.#raycaster.setFromCamera(pointer, this.#camera)
+    const intersects = this.#raycaster.intersectObject(this.#group, true)
+    if (intersects.length > 0) {
+
+      const res = intersects.filter(res => {
+        return res && res.object;
+      })[0]
+
+      if (res && res.object) {
+
+        this.selectedObject = res.object;
+        this.selectedObject.material.color.set('#f00');
+
+      }
+
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     // The first step is to get the reference of the canvas element from our HTML document
     this.#canvas = canvas.nativeElement
     this.#canvas.addEventListener("click", this.#onDuckClicked)
+    this.#canvas.addEventListener("mousemove", this.#onPointerMove)
     this.#renderer = new THREE.WebGLRenderer({
       canvas: this.#canvas,
       alpha: true,    // transparent background
@@ -86,7 +136,7 @@ export class EngineService implements OnDestroy {
 
     // soft white light
     this.#setLights()
-
+    this.#addMouseOverSprites()
     this.#scene.background = new THREE.Color(0x323232)
     // this.#scene.fog = new THREE.Fog(this.#scene.background, 1, 10)
     // this.#addSimpleGeometry()
@@ -343,6 +393,6 @@ export class EngineService implements OnDestroy {
 
 
 
-  
+
 
 }
