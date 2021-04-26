@@ -34,8 +34,10 @@ export class EngineService implements OnDestroy {
 
   #cube: THREE.Mesh
   #duck: THREE.Object3D
+  #avocado: THREE.Object3D
   #anotherDuck: THREE.Object3D
   #frameId: number = null
+  #loader: GLTFLoader
 
   public constructor(private ngZone: NgZone) {
   }
@@ -138,6 +140,9 @@ export class EngineService implements OnDestroy {
     // create the scene
     this.#scene = new THREE.Scene()
 
+    this.#manager = new THREE.LoadingManager()
+    this.#loader = new GLTFLoader(this.#manager).setPath('../assets/')
+
     // setup camera
     this.#setCamera()
 
@@ -148,6 +153,7 @@ export class EngineService implements OnDestroy {
     // this.#scene.fog = new THREE.Fog(this.#scene.background, 1, 10)
     // this.#addSimpleGeometry()
     this.#loadSampleModel()
+    this.#addAvocado()
     this.#setupControls()
     this.animate()
   }
@@ -255,11 +261,34 @@ export class EngineService implements OnDestroy {
 
   }
 
+  #addAvocado = () => {
+    this.#loader.load('avocado.glb', glb => {
+      this.#avocado = glb.scene
+      this.#avocado.position.set(5, 0, -5)
+      this.#avocado.scale.set(50, 50, 50)
+      this.#scene.add(this.#avocado)
+    })
+  }
+
+
+  public highlight = () => {
+    this.#avocado.traverse(avo => {
+      const currentMaterial = avo.material
+      const color = new THREE.Color('#ff00ff')
+      (<any>avo).material.color.setHex({
+        r: color.r,
+        g: color.g,
+        b: color.b,
+      })
+      //  console.log(avo.material.emissive.getHex())
+    })
+   
+
+  }
+
   #loadSampleModel = () => {
     // load terrain models
-    this.#manager = new THREE.LoadingManager()
-    const loader = new GLTFLoader(this.#manager).setPath('../assets/')
-    loader.load('duck.glb', glb => {
+    this.#loader.load('duck.glb', glb => {
       glb.scene.traverse(child => {
         if ((<THREE.Mesh>child).isMesh) {
           let model = <THREE.Mesh>child
@@ -276,9 +305,6 @@ export class EngineService implements OnDestroy {
       this.#scene.add(this.#duck)
       this.#setHelpers()
     })
-    this.#manager.onLoad = () => {
-      console.log('model loaded ...')
-    }
   }
 
   #cloneThisModel = model => {
