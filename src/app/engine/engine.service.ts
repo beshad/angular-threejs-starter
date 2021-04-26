@@ -12,6 +12,7 @@ import {
 } from "three/examples/jsm/renderers/CSS2DRenderer.js"
 import { of } from 'rxjs'
 import { AstVisitor } from '@angular/compiler'
+import { WireframeGeometry } from 'three'
 
 
 @Injectable({ providedIn: 'root' })
@@ -113,6 +114,7 @@ export class EngineService implements OnDestroy {
       })[0]
 
       if (res && res.object) {
+        document.body.style.cursor = 'pointer'
         this.selectedObject = res.object;
         const div = document.createElement('div')
         div.className = 'label'
@@ -120,9 +122,10 @@ export class EngineService implements OnDestroy {
         const label = new CSS2DObject(div)
         this.selectedObject.add(label)
         this.selectedObject.material.color.set('#f00');
-
       }
 
+    } else {
+      document.body.style.cursor = 'default'
     }
   }
 
@@ -277,10 +280,17 @@ export class EngineService implements OnDestroy {
 
 
   public highlight = (value) => {
+    // if (glb instanceof THREE.Mesh) { }
 
     const target = <any>this.#avocado.children[0]
     const initial = new THREE.Color(target.material.color.getHex())
     const color = new THREE.Color(0xff6666)
+
+    // let geometry = target.geometry
+    // const wireframeGeometry = new THREE.WireframeGeometry(geometry)
+    // const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 })
+    // const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+    // this.#avocado.add(wireframe)
 
     // TweenLite.to(initial, 1, {     
     //   r: color.r,
