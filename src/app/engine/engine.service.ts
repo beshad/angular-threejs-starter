@@ -10,6 +10,8 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js"
+import { of } from 'rxjs'
+import { AstVisitor } from '@angular/compiler'
 
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +23,7 @@ export class EngineService implements OnDestroy {
   #scene: THREE.Scene
   #light: THREE.AmbientLight
   #clock = new THREE.Clock()
+  #avocadoMaterial: THREE.MeshBasicMaterial
 
   selectedObject
 
@@ -60,6 +63,7 @@ export class EngineService implements OnDestroy {
     )
     if (intersects.length > 0) {
       const color = new THREE.Color('#ff00ff')
+
       const mesh = <THREE.Mesh>intersects[0].object
       TweenLite.to((<any>mesh).material.color, 1, {
         r: color.r,
@@ -267,23 +271,41 @@ export class EngineService implements OnDestroy {
       this.#avocado.position.set(5, 0, -5)
       this.#avocado.scale.set(50, 50, 50)
       this.#scene.add(this.#avocado)
+      this.#avocadoMaterial = (<any>this.#avocado.children[0]).material.color.getHex()
     })
   }
 
 
-  public highlight = () => {
-    this.#avocado.traverse(avo => {
-      const currentMaterial = avo.material
-      const color = new THREE.Color('#ff00ff')
-      (<any>avo).material.color.setHex({
+  public highlight = (value) => {
+
+    const target = <any>this.#avocado.children[0]
+    const initial = new THREE.Color(target.material.color.getHex())
+    const color = new THREE.Color(0xff6666)
+
+    // TweenLite.to(initial, 1, {     
+    //   r: color.r,
+    //   g: color.g,
+    //   b: color.b,
+    //   onUpdate: () => {
+    //     (<any>target).material.color = initial;
+    //   }
+    // })
+
+    if (value) {
+      TweenLite.to(initial, 1, {
         r: color.r,
         g: color.g,
         b: color.b,
+        onUpdate: () => {
+          (<any>target).material.color = initial;
+        },
+        onComplete: () => {
+          //
+        }
       })
-      //  console.log(avo.material.emissive.getHex())
-    })
-   
-
+    } else {
+      (<any>target).material.color.setHex(this.#avocadoMaterial)
+    }
   }
 
   #loadSampleModel = () => {

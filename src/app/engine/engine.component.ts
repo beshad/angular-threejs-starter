@@ -13,6 +13,8 @@ import {EngineService} from './engine.service';
 })
 export class EngineComponent implements OnInit {
 
+  avocado:boolean = false
+
   @ViewChild('rendererCanvas', {static: true})
   public rendererCanvas: ElementRef<HTMLCanvasElement>;
 
@@ -28,7 +30,8 @@ export class EngineComponent implements OnInit {
   }
 
   public highlight = () => {
-    this.engServ.highlight()
+    this.avocado = !this.avocado
+    this.engServ.highlight(this.avocado)
   }
 
 
