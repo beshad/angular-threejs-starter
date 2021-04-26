@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ElementRef, Injectable, NgZone, OnDestroy } from '@angular/core'
 
 import * as TWEEN from "@tweenjs/tween.js"
-import { TweenLite } from 'gsap'
+import { TweenLite, gsap, Linear } from 'gsap'
 
 import {
   CSS2DRenderer,
@@ -306,6 +306,8 @@ export class EngineService implements OnDestroy {
         r: color.r,
         g: color.g,
         b: color.b,
+        repeat: -1,
+        ease:Linear.easeInOut,
         onUpdate: () => {
           (<any>target).material.color = initial;
         },
