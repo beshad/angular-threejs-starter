@@ -164,9 +164,10 @@ export class EngineService implements OnDestroy {
   }
 
   #addBottle = () => {
-    this.#loader.load("box.glb", (glb) => {
+    this.#loader.load("texture-coordinate.glb", (glb) => {
+      console.log(glb)
       this.#box = glb.scene;
-      this.#box.position.set(0, 0, 5);
+      this.#box.position.set(0, 0, -5);
       this.#box.scale.set(2, 2, 2);
       this.#scene.add(this.#box);
     });
@@ -175,22 +176,16 @@ export class EngineService implements OnDestroy {
   toggleLayer = (bool) => {
     var loader = new THREE.TextureLoader();
     this.#box.traverse((mesh) => {
-      if (mesh.isMesh) {
+      if (mesh instanceof THREE.Mesh) {
         mesh.geometry.clearGroups();
         mesh.geometry.addGroup(0, Infinity, 0);
         mesh.geometry.addGroup(0, Infinity, 1);
-      }
-    });
-
-    this.#box.traverse((child) => {
-      if (child.isMesh) {
-        console.log(child);
-        child.material.map = loader.load("https://picsum.photos/id/1012/100");
-        // child.material = new THREE.MeshBasicMaterial({
-        //   // color: 0xff3333,
-        //   map: loader.load("https://picsum.photos/id/1012/1000"),
-        //   side: THREE.DoubleSide,
-        // });
+        // mesh.material.map = loader.load("https://picsum.photos/id/1013/100");
+        mesh.material = new THREE.MeshBasicMaterial({
+          // color: 0xff3333,
+          map: loader.load("https://picsum.photos/id/1012/1000"),
+          side: THREE.DoubleSide,
+        });
       }
     });
   };
